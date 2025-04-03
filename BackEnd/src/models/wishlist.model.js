@@ -11,8 +11,8 @@ const wishListSchema = new Schema(
       ref: "Listing",
     },
     name: {
-        type: String
-    }
+      type: String,
+    },
   },
   { timestamps: true },
 );
