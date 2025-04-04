@@ -55,4 +55,47 @@ const validateUserLogin = (req, res, next) => {
   next();
 };
 
-export { validateUserRegister, validateUserLogin };
+const validateUserForgotPass = (req, res, next) => {
+  const validateSchema = z.object({
+    email: z.string().email({ message: "Invalid Email" }),
+  });
+
+  const validateData = validateSchema.safeParse(req.body);
+
+  if (!validateData.success) {
+    return next(
+      new ApiError(
+        401,
+        "Invalid Credentials",
+        validateData.error.issues[0].message,
+      ),
+    );
+  }
+
+  next();
+};
+
+const validateUserResetPass = (req, res, next) => {
+  const validateSchema = z.object({
+    password: z
+      .string()
+      .min(6, { message: "Password must be atleast 6 characters" })
+      .max(30, { message: "Password cannot exceed 30 characters" }),
+  });
+
+  const validateData = validateSchema.safeParse(req.body);
+
+  if (!validateData.success) {
+    return next(
+      new ApiError(
+        401,
+        "Invalid Credentials",
+        validateData.error.issues[0].message,
+      ),
+    );
+  }
+
+  next();
+};
+
+export { validateUserRegister, validateUserLogin, validateUserForgotPass, validateUserResetPass };
