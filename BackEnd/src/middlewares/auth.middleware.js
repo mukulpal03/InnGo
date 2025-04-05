@@ -10,7 +10,7 @@ export const isLoggedIn = (req, res, next) => {
 
   const decodedData = jwt.verify(token, process.env.JWT_SECRET);
 
-  req.user = decodedData.id;
+  req.user = decodedData;
 
   next();
 };
