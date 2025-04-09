@@ -1,9 +1,22 @@
+import Mailgen from "mailgen";
 import nodemailer from "nodemailer";
 
-async function sendEmailVerificationMail(token, email) {
+const sendMail = async (options) => {
+  const mailGenerator = new Mailgen({
+    theme: "default",
+    product: {
+      name: "InnGo",
+      link: "https://inngo.com/",
+    },
+  });
+
+  var emailHtml = mailGenerator.generate(options.mailGenContent);
+  var emailText = mailGenerator.generatePlaintext(options.mailGenContent);
+
   const transporter = nodemailer.createTransport({
     host: process.env.MAILTRAP_HOST,
     port: process.env.MAILTRAP_PORT,
+    secure: false,
     auth: {
       user: process.env.MAILTRAP_USER,
       pass: process.env.MAILTRAP_PASSWORD,
@@ -12,36 +25,51 @@ async function sendEmailVerificationMail(token, email) {
 
   const mailOptions = {
     from: process.env.MAILTRAP_SENDEREMAIL,
-    to: email,
-    subject: "Verify your email",
-    text: `Please Verify by clicking on this following link
-        ${process.env.BASE_URL}/api/v1/users/verify/${token}
-        `,
+    to: options.email,
+    subject: options.subject,
+    text: emailText,
+    html: emailHtml,
   };
 
   return await transporter.sendMail(mailOptions);
-}
+};
 
-async function sendResetPasswordMail(token, email) {
-  const transporter = nodemailer.createTransport({
-    host: process.env.MAILTRAP_HOST,
-    port: process.env.MAILTRAP_PORT,
-    auth: {
-      user: process.env.MAILTRAP_USER,
-      pass: process.env.MAILTRAP_PASSWORD,
+const emailVerificationMailGenContent = (username, verificationUrl) => {
+  return {
+    body: {
+      name: username,
+      intro: "Welcome to InnGo! We're very excited to have you on board.",
+      action: {
+        instructions: "To Verify your email, please click here:",
+        button: {
+          color: "#22BC66", // Optional action button color
+          text: "Confirm your account",
+          link: verificationUrl,
+        },
+      },
+      outro:
+        "Need help, or have questions? Just reply to this email, we'd love to help.",
     },
-  });
-
-  const mailOptions = {
-    from: process.env.MAILTRAP_SENDEREMAIL,
-    to: email,
-    subject: "Verify your email",
-    text: `Please Reset your password by clicking on this following link
-        ${process.env.BASE_URL}/api/v1/users/reset-password/${token}
-        `,
   };
+};
 
-  return await transporter.sendMail(mailOptions);
-}
+const resetPasswordMailGenContent = (username, passwordReserUrl) => {
+  return {
+    body: {
+      name: username,
+      intro: "We've got a request to reset your password",
+      action: {
+        instructions: "To reset your password, please click here:",
+        button: {
+          color: "#22BC66", // Optional action button color
+          text: "Confirm your account",
+          link: passwordReserUrl,
+        },
+      },
+      outro:
+        "Need help, or have questions? Just reply to this email, we'd love to help.",
+    },
+  };
+};
 
-export { sendEmailVerificationMail, sendResetPasswordMail };
+export {sendMail, emailVerificationMailGenContent, resetPasswordMailGenContent}

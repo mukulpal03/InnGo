@@ -98,4 +98,9 @@ const validateUserResetPass = (req, res, next) => {
   next();
 };
 
-export { validateUserRegister, validateUserLogin, validateUserForgotPass, validateUserResetPass };
+export {
+  validateUserRegister,
+  validateUserLogin,
+  validateUserForgotPass,
+  validateUserResetPass,
+};

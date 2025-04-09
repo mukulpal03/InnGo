@@ -1,16 +1,32 @@
-import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/api-error.js";
+import jwt from "jsonwebtoken";
+import { User } from "../models/user.model.js";
 
-export const isLoggedIn = (req, res, next) => {
-  const { token } = req.cookies;
+const isLoggedIn = async (req, res, next) => {
+  try {
+    const token =
+      req.cookies?.accessToken ||
+      req.header("Authorization")?.replace("bearer ", "");
 
-  if (!token) {
-    return next(new ApiError(401, "Please Login"));
+    if (!token) {
+      return next(new ApiError(401, "Unauthorized access"));
+    }
+
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+    const user = await User.findById(decodedToken._id).select(
+      "-password -refreshToken",
+    );
+
+    if (!user) {
+      return next(new ApiError(401, "Unauthorized access"));
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    throw new ApiError(401, error?.message || "Invalid access token");
   }
-
-  const decodedData = jwt.verify(token, process.env.JWT_SECRET);
-
-  req.user = decodedData;
-
-  next();
 };
+
+export default isLoggedIn;

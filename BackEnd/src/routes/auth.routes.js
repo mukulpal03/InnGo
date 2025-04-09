@@ -3,6 +3,7 @@ import {
   forgotPassword,
   loginUser,
   logoutUser,
+  refreshAccessToken,
   registerUser,
   resetPassword,
   verifyUser,
@@ -14,7 +15,7 @@ import {
   validateUserForgotPass,
   validateUserResetPass,
 } from "../middlewares/validator.middleware.js";
-import { isLoggedIn } from "../middlewares/auth.middleware.js";
+import isLoggedIn from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -22,17 +23,16 @@ router.post("/register", validateUserRegister, asyncHandler(registerUser));
 router.post("/verify/:token", asyncHandler(verifyUser));
 router.post("/login", validateUserLogin, asyncHandler(loginUser));
 router.post("/logout", isLoggedIn, asyncHandler(logoutUser));
-router.post(
+router.get(
   "/forgot-password",
-  isLoggedIn,
   validateUserForgotPass,
   asyncHandler(forgotPassword),
 );
 router.post(
   "/reset-password/:token",
-  isLoggedIn,
   validateUserResetPass,
   asyncHandler(resetPassword),
 );
+router.post("/refresh-access-token", asyncHandler(refreshAccessToken));
 
 export default router;
